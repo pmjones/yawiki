@@ -1,0 +1,18 @@
+####### SQL MIGRATION FROM 0.11x to 0.12
+
+##### Make a backup before you try this!  You have been warned!
+##### Non-MySQL users must change LONGTEXT to the proper field
+##### type for their database (capable of 2G storage for DB_Table
+##### compliance).
+
+### yawiki_store
+
+# add column
+
+ALTER TABLE yawiki_store ADD COLUMN html LONGTEXT;
+
+### yawiki_areas
+
+# add column
+
+ALTER TABLE yawiki_areas ADD COLUMN cache_html DECIMAL(1,0);

@@ -1,0 +1,9 @@
+####### SQL MIGRATION FROM 0.21 to 0.22
+
+##### Make a backup before you try this!  You have been warned!
+
+### yacs
+
+# add column
+
+ALTER TABLE yacs ADD COLUMN ip VARCHAR(15);

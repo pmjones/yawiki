@@ -1,0 +1,105 @@
+####### SQL MIGRATION FROM 0.6.x and earlier to 0.7
+
+##### Make a backup before you try this!  You have been warned!
+
+##### If you are not using MySQL, you will need to change the
+##### "DROP INDEX index_name ON table_name" commands to
+##### "DROP INDEX table_name.index_name".  Sorry.  :-(
+
+##### If you never had comments turned on, then you don't have
+##### a 'yacs' table.  If those alteration commands for yacs
+##### (at the very end of this file) are executed, you'll see
+##### errors.  That's OK, everything else will have run at that
+##### point.  Again, sorry.  :-(
+
+##### Last point: I don't know how to write portable SQL code to 
+##### automatically populate the yawiki_areas table based on the
+##### distinct areas already in yawiki_store, so you will have to
+##### enter the area names by hand in the yawiki_areas table.
+##### Again, sorry, again.  :-(
+
+### yawiki_store
+
+# change WikiMap pages names to AreaMap
+UPDATE yawiki_store SET page = 'AreaMap' WHERE page = 'WikiMap';
+
+# rename column and index 'user' to 'username'
+ALTER TABLE yawiki_store ADD COLUMN username VARCHAR(255) NOT NULL;
+UPDATE yawiki_store SET username = user;
+DROP INDEX user ON yawiki_store;
+ALTER TABLE yawiki_store DROP COLUMN user;
+CREATE INDEX username ON yawiki_store (username);
+
+# rename column and index 'wiki' to 'area'
+ALTER TABLE yawiki_store ADD COLUMN area VARCHAR(255) NOT NULL;
+UPDATE yawiki_store SET area = wiki;
+DROP INDEX wiki ON yawiki_store;
+ALTER TABLE yawiki_store DROP COLUMN wiki;
+CREATE INDEX area ON yawiki_store (area);
+
+# add title column
+ALTER TABLE yawiki_store ADD COLUMN title VARCHAR(255) NULL;
+
+# add note column
+ALTER TABLE yawiki_store ADD COLUMN note VARCHAR(255) NULL;
+
+# drop lock_user column and index
+DROP INDEX lockuser ON yawiki_store;
+ALTER TABLE yawiki_store DROP COLUMN lockuser;
+
+# drop lock_dt column and index
+DROP INDEX lockdt ON yawiki_store;
+ALTER TABLE yawiki_store DROP COLUMN lockdt;
+
+
+### yawiki_acl
+
+# rename column and index 'user' to 'username'
+ALTER TABLE yawiki_acl ADD COLUMN username VARCHAR(255) NOT NULL;
+UPDATE yawiki_acl SET username = user;
+DROP INDEX user ON yawiki_acl;
+ALTER TABLE yawiki_acl DROP COLUMN user;
+CREATE INDEX username ON yawiki_acl (username);
+
+# rename column and index 'wiki' to 'area'
+ALTER TABLE yawiki_acl ADD COLUMN area VARCHAR(255) NOT NULL;
+UPDATE yawiki_acl SET area = wiki;
+DROP INDEX wiki ON yawiki_acl;
+ALTER TABLE yawiki_acl DROP COLUMN wiki;
+CREATE INDEX area ON yawiki_acl (area);
+
+# change 'wiki_admin' priv values to 'area_admin'
+UPDATE yawiki_acl SET priv = 'area_admin' WHERE priv = 'wiki_admin';
+
+# change 'sys_admin' priv values to 'wiki_admin'
+UPDATE yawiki_acl SET priv = 'wiki_admin' WHERE priv = 'sys_admin';
+
+### yawiki_links
+
+# rename column and index 'src_wiki' to 'src_area'
+ALTER TABLE yawiki_links ADD COLUMN src_area VARCHAR(255) NOT NULL;
+UPDATE yawiki_links SET src_area = src_wiki;
+DROP INDEX src_wiki ON yawiki_links;
+ALTER TABLE yawiki_links DROP COLUMN src_wiki;
+CREATE INDEX src_area ON yawiki_links (src_area);
+
+# rename column and index 'tgt_wiki' to 'tgt_area'
+ALTER TABLE yawiki_links ADD COLUMN tgt_area VARCHAR(255) NOT NULL;
+UPDATE yawiki_links SET tgt_area = tgt_wiki;
+DROP INDEX tgt_wiki ON yawiki_links;
+ALTER TABLE yawiki_links DROP COLUMN tgt_wiki;
+CREATE INDEX tgt_area ON yawiki_links (tgt_area);
+
+### yacs
+
+# rename column and index 'user' to 'username'
+ALTER TABLE yacs ADD COLUMN username VARCHAR(255) NOT NULL;
+UPDATE yacs SET username = user;
+ALTER TABLE yacs DROP COLUMN user;
+
+# rename column and index 'datetime' to 'dt'
+ALTER TABLE yacs ADD COLUMN dt CHAR(19) NOT NULL;
+UPDATE yacs SET dt = datetime;
+DROP INDEX datetime ON yacs;
+ALTER TABLE yacs DROP COLUMN datetime;
+CREATE INDEX dt ON yacs (dt);

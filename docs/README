@@ -1,0 +1,165 @@
+//This document refers to version 0.18 alpha and later.//
+
+[[toc]]
+
+YaWiki is "Yet Another Wiki" for PHP; this README file should help you get started.
+
+
+++ Dependencies
+
+For YaWiki to operate, you need a working PEAR installation in your include_path with the Yawp package (and all supporting packages) installed, along with the Savant template system, the Text_Wiki parser, and the Text_Diff parser.
+
+* Yawp      -- http://phpyawp.com/
+* Savant2   -- http://phpsavant.com/
+* Text_Wiki -- http://pear.php.net/package/Text_Wiki
+* Text_Diff -- http://pear.php.net/package/Text_Diff
+
+
+++ Config File
+
+YaWiki uses the Yawp foundation; as such, you need a working Yawp.conf.php file at your DOCUMENT_ROOT.  An example Yawp.conf.php file is included in the docs/ directory.
+
+In the Yawp.conf.php file, there are some YaWiki configuration groups. They are:
+
+* [yawiki] -- The main configuration group.  The default_area and default_page elements tell YaWiki what area and page to display by default (and what area and page to create when YaWiki is first installed).  There are also some Text_Wiki preference settings here.
+
+* [yawiki_acl] -- The create_wiki_admin element determines the username of the wiki admin when the yawiki_acl table is first created; this has no effect after the table is created.
+
+* [yawiki_locks] -- The timeout element is the number of minutes a user can lock a page for when editing it.
+
+
+++ Installation Instructions
+
+# DO NOT BROWSE TO YAWIKI UNTIL THE CONFIG FILE IS READY.  IF YOU ARE MIGRATING FROM AN EARLIER VERSION, FOLLOW THE MIGRATION INSTRUCTIONS AT THIS TIME.
+
+# Get PEAR working.  Install and/or upgrade the Yawp package and its dependencies, then install and/or upgrade the Savant2, Text_Wiki, and Text_Diff packages.
+
+# Make sure your include_path has PEAR and your web DOCUMENT_ROOT in it.
+
+# You have obviously downloaded and unpacked the YaWiki application; put the yawiki/ directory at your DOCUMENT_ROOT.
+
+# Create a file called "Yawp.conf.php" at your DOCUMENT_ROOT; try using the example distribution file in docs/Yawp.conf-example.php.
+
+ * Make sure the [Yawp] group has a start-hook for the YaWiki start.hook.php file (e.g., "start = %DOCUMENT_ROOT%yawiki/lib/start.hook.php".
+
+ * Insert your [DB] configuration params (phptype, hostspec, username, etc).
+
+ * If you are doing user authentication, edit the [Auth] group to set the proper container (DB, LDAP, File, etc), the idle and expire times in seconds, and the error messages.  Then Edit the [Auth_%container%] group (e.g., [Auth_DB]) to set the options for that container.
+
+ * Edit the [yawiki_acl] create_wiki_admin element to reflect your own username at stored in the Auth container; this will allow you to edit the access control list for YaWiki.
+
+# Browse to your new YaWiki installation; this will automatically create the database tables for the wiki pages, link tracking, hit counts, and access control lists, and populate them with useful values.  By default, only one user is allowed to be wiki_admin, but all users (even anonymous ones) can view and edit pages.
+
+
+++ Access Control
+
+Log in with your wiki_admin username and browse to yawiki/acl.php -- you can add and delete access controls from here.
+
+
+++ Adding New Areas
+
+Log in with your wiki_admin username and browse to yawiki/area_list.php -- you can add new areas within the wiki from here.
+
+
+++ !AreaMap
+
+The AreaMap page allows you to control the hierarchy of how pages are displayed within an area; just type in page names.  If a name is at the left margin (no spaces) it's a first-level page.  One space in front of the name makes it a second-level page, two spaces makes it a third-level page, and so on.  If you put a space and some text after the page name, that text will be displayed instead of the page name.  For example:
+
+<code>
+HomePage
+My Project
+ MajorSectionOne First Section
+  SubSectionOneA 1-A
+  SubSectionOneB 1-B
+ MajorSectionTwo Second Section
+  SubSectionTwoA 2-A
+  SubSectionTwoB 2-B
+</code>
+
+Page names still need to be unique within the area; the AreaMap page controls navigational elements, but the wiki storage space is still flat (not hierarchical).
+
+The default YaWiki theme shows up to three levels of navigation, but you can write new themes to show as many or as few as you like.
+
+
+++ Customizing Text_Wiki
+
+Text_Wiki is the underlying library that handles the parsing and rendering of wiki-formatted text into XHTML.
+
+As of YaWiki 0.18 and later, you can configure Text_Wiki more directly and with finer control.  In YaWiki versions prior to 0.18, there were special elements in the [yawiki] group in Yawp.conf.php to control Text_Wiki; these have been removed in favor of a series of [Text_Wiki*] groups.  Be sure to consult the Text_Wiki documentation in full as you proceed to configure it, <http://wiki.ciaweb.net/yawiki/index.php?area=Text_Wiki>.
+
+
++++ Rendering Ouptut
+
+The [Text_Wiki_Render_Xhtml_*] groups control how Text_Wiki will render XHTML output, such as what CSS classes the various XHTML elements will use.  For example, to tell Text_Wiki to use the CSS class "myPara" for paragraph elements, you would specify:
+
+<code>
+[Text_Wiki_Render_Xhtml_Paragraph]
+css = myPara
+</code>
+
+To define how Text_Wiki renders ordered and unordered lists:
+
+<code>
+[Text_Wiki_Render_Xhtml_List]
+
+; for the <ol> tag
+css_ol = myOLclass 
+
+; for the <li> tags inside <ol> blocks
+css_ol_li = myLiClass
+
+; for the <ul> tag
+css_ol = myULclass 
+
+; for the <li> tags inside <ul> blocks
+css_ol_li = myLiClass2
+</code>
+
+Your stylesheet (usually stylesheet.tpl.php in a custom theme directory) will still need to define the specified CSS classes.  For a list of the available options for the various XHTML renderering rules, please see <http://wiki.ciaweb.net/yawiki/index.php?area=Text_Wiki&page=WikiRules>.
+
+You don't **have** to use the Text_Wiki rendering options; if none are specified, then the CSS classes will match the CSS classes for your normal (non Text_Wiki) elements.
+
+
++++ Enabling and Disabling Rules
+
+To enable or disable a rule for Text_Wiki, edit the [Text_Wiki] group and add or remove "enable" and "disable" keys.  For example, to disable raw HTML processing:
+
+<code>
+[Text_Wiki]
+disable = html
+</code>
+
+By default, the rules for "embed", "html", and "include" are disabled.  These are powerful and dangerous rules that must be used carefully, and only after taking security risks into consideration.
+
+
++++ Building New Rule Sets
+
+If you want to spcify an entirely new rule set, add a series of "rule" keys to the [Text_Wiki] group.  This rulet set will entirely override the default ruleset.  For example, if you only want strong, emphasis, and blockquote rules to be applied, you would do something like this:
+
+<code>
+[Text_Wiki]
+rule = Strong
+rule = Emphasis
+rule = Blockquote
+</code>
+
+
++++ Adding Custom Parse Rules
+
+To tell Text_Wiki where to look for customized parse rules, add one or more path keys to the [Text_Wiki_Parse] group.
+
+<code>
+[Text_Wiki_Parse]
+path = /path/to/rules/parse
+</code>
+
++++ Adding Custom Render Rules
+
+In general, you need a companion render rule for each parse rule.  To tell Text_Wiki where to look for customized render rules, add one or more path keys to the [Text_Wiki_Render] group.
+
+<code>
+[Text_Wiki_Render]
+path = /path/to/rules/render
+</code>
+
+Note that you will need an "Xhtml/" directory that is not part of the path name; becuase Text_Wiki supports multiple render formats, the path you specify is really a base path to the rules for all possible formats.  Thus, the above example sets the path to "/path/to/rules/render", so when Text_Wiki renders in Xhtml it will look in "/path/to/rules/render/Xhtml/" for the actual render classes.

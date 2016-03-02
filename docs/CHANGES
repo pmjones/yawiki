@@ -1,0 +1,464 @@
+2005-09-11: fixed bug where a freshly started yawiki creates default_area 'Main' and default_page 'HomePage' in the database, ignoring the settings in the config file.  thanks, gramlich@eosc.de.
+
+
+
++ Change Log
+
+++ Beta Versions
+
++++ 0.22
+
+2005-08-01
+
+* Schema Change:  Added a column to yacs.  Run the "docs/MIGRATE_021_022" SQL code against your database, otherwise comments won't post proeprly.
+
+* Now requires Savant 2.4.0, as the default theme templates make extensive use of Savant2::_() to help automate output escaping.
+
+* Fixed bug in search template noted by David Coallier and reported by Davey Shafik.  Thanks, guys.
+
+* Comment submission now redirects to the same page as the comment was posted on; previously, overzealous application of htmlspecialchars() interfered with proper redirection, sending the commenter to the HomePage for the area.
+
+* Comment submission now captures the commenter's IP number.
+
+* Comments are now deletable by the page administrator, not just the area administrator.
+
+
++++ 0.21.1
+
+2005-07-10
+
+* Arnaud Limbourg performed a code audit for $_GET, $_POST, and $_SERVER usage. He discovered some instances of unescaped $_SERVER values in the controller scripts (not the templates).  Escaping has been applied to those instances, even in some cases where it does not appear immediately necessary.  Thanks, Arnaud.
+
+
++++ 0.21
+
+2005-07-08
+
+* Security Fix: In the default template set, added a paranoid number of htmlspecialchars() to help prevent cross-site scripting attacks; it should only matter in the comments template, but you never know.
+
+* Schema Change: Added a column to yawiki_areas.  Run the "docs/MIGRATE_020_021" SQL code against your database.
+
+* Added file "changes.php" for quick change listings (thanks Del!)
+
+* Area administrators can now clear page locks via the area_pages.php script (thanks Del!)
+
+* The top-level navigation elements are now always populated, even for pages not on the AreaMap
+
+* Added file "referrals.php" to show external referrals
+
+* New file added by Del: changes.php (for quick access to change logs)
+
+
+++ Alpha Versions
+
++++ 0.20
+
+2005-01-17
+
+* Added "create new page" link in the authentication box, so you can create a new page directly instead of having to edit an existing page (requires Javascript)
+
+* Added "edit this page" link in the authentication box, so you don't need to scroll all the way down to end of the page
+
+* Can now specify i18n strings for submit buttons (Save, Cancel, Delete, etc) and scripts will honor them.  See the new Yawp.conf-dist.php file for more information.  Per request from Heiner Gassen.
+
+* History links to older page versions now bring up the proper version, not the current version.  Per note from Lukas Smith.
+
+
++++ 0.19.1
+
+2005-01-07
+
+* changed "create new page" link on error page from "/yawiki/edit.php" to "edit.php" (thanks Tobias Nix)
+
+* removed htmlentities() call when displaying source; on further consideration, the content-type of text/plain should be enough to secure against XSS attacks
+
+* removed "plain" view type, it was left over from earlier debugging
+
+
++++ 0.19
+
+2005-01-06
+
+* area map allows optional navigation element title; use | character to separate page from nav title
+
+* when error is "page does not exist" we now provide a link to "do you want to create it?"
+
+* when viewing source, now applies htmlspecialchars() to the source (helps prevent XSS attacks)
+
+* if user is already editing page, lets him click 'edit' instead of blocking it
+
+* numbered revision links in history list now work (was problem with $yawiki->getViewLink)
+
+* in Yawp.conf-example.php, added default [Text_Wiki_Render_Xhtml_Table] group
+
+* uses "show" page titles in the html title tag (when available)
+
+* added create-page link on AreaMap when page does not exist
+
+* when creating a new page, does not insert into DB until saved for the first time
+
+* edit.tpl.php now puts form at **top** of the page, and uses Savant form plugin
+
+* users are now named in the diff view
+
+
++++ 0.18.2
+
+2004-11-12
+
+* New page links now work properly (fixed a typo, from "index" to "edit", in yawiki.class.php) -- thanks, Gregor Gramlich
+
+
++++ 0.18.1
+
+2004-11-11
+
+* changed Yawp.conf-example.php "[yawiki]]" group to "[yawiki]" -- typo discovered by gramlich@eosc.de (thanks!)
+
+
++++ 0.18
+
+2004-11-10
+
+* updated to take advantage of Text_Wiki 0.22 and later
+* configuration change:  Text_Wiki parsing and rendering is much more configurable via [Text_Wiki_*] groups in Yawp.conf.php (instead of via the [yawiki] group)
+* now supports RSS feeds for all pages in all areas, all pages in one area, or one page in one area
+* yawiki::getPage() now takes optional $area, $page, and $dt arguments
+* clicking on the "Revert" button when no date-time is selected now reverts to the most-current saved version
+* cannot delete Main (or other default) area in area_list.php
+* other areas in the wiki are automatically set up as interwiki sites
+* acl.php area name list now shows a '*' wildcard
+* there is now a "settings" link on area_list.php (clicking on the area name will take you to the page list)
+
+
++++ 0.17.2
+
+2004-08-16
+
+* Fixed break in area_pages.php where a call to the map did not specify which area
+* Fixed break in yawiki.class.php method _buildMap() to check isset() on the title for a page
+
+
++++ 0.17.1
+
+2004-08-13
+
+* Fixed the search facilty, sorry for the break
+
+
++++ 0.17 alpha
+
+2004-08-12
+
+* MAJOR CHANGES to AreaMap, you will need to edit your AreaMap pages
+ * changed AreaMap transformation process, removed from yawiki_store and into yawiki proper
+ * can now use any text as a page name (i.e., all lines are freelink lines)
+ * uses the saved page title for the navigation title, not the secondary text from the AreaMap
+ * uses the **entire line** as the linked page name, no longer part-name and part-title
+ * regex to do a find-and-replace on your AreaMap:  find ``^([ ]*)([a-zA-Z0-9]+)( )(.*)$`` and replace with ``\1\2``
+* added page deletion tools for area admins
+* added area deletion tools for wiki admins
+* fixed ampersand bugs in templates created by conversion to from Savant 1.x to Savant2
+* in acl.tpl.php, converted to "admin" table class, added narrative text
+* in acl.php, build a list of all areas so you can select from a dropdown
+* hits.php now wrapped in header and footer templates
+* search.tpl.php now checks isset() on $this->result
+
+
++++ 0.16.1 alpha
+
+2004-08-10
+
+* comments.tpl.php now applies htmlspecialchars to comment body
+
++++ 0.16 alpha
+
+2004-08-10
+
+* Converted all templates and logic to use Savant2
+* minor stylesheet changes
+* in edit.php, only call clearHtmlBatch() if there are more than zero inbound links
+
+
++++ 0.15.1 alpha
+
+2004-07-25
+
+* made the quick-search form its own template
+* search.php does not show area list when only_area is set
+* search.php only shows allowed areas
+* search results show path to page
+
+
++++ 0.15 alpha
+
+2004-07-22
+
+* NOTE: be sure to upgrade to Text_Wiki 0.20.1 or later, need the new Plain renderer in it
+* added simple search capability (searches page name, title, and body; is a phrase/keyword search, not a relevance engine)
+* added util/buildsearch.php to build or rebuild the search table
+* added search bar to default header template
+* added margin above lower link-bar in index.tpl.php
+
+
++++ 0.14.1 alpha
+
+2004-07-18
+
+* added $apiVersion property in yawiki.class.php (read from docs/VERSION)
+* Added "Powered by Yawiki" link in default index.tpl.php
+* edit.php now shows page title in preview
+
+
++++ 0.14 alpha
+
+2004-07-18
+
+* added interwiki_site examples to Yawp.conf-example.php
+* pages not on the area map get useful HTML titles now
+* default template shows the page title as an H1 tag (when the title is not empty)
+* added full support for free links in content, still can't use them as AreaMap elements
+* hits.php adds "days" and "rate-per-day" columns
+
++++ 0.13 alpha
+
+2004-07-17
+
+* added logout hook to unlock all pages for the user, add it to your Yawp.conf.php [Yawp] group (c.f. example Yawp.conf.php file)
+* revamped edit.php logic and template layout (also adds page-title field support)
+* changed from include lib/footer to Yawp::stop() in edit.php error section
+* fixed link-tracking updates in edit.php save section
+* minor change to stylesheet (text inputs are now monospaced)
+* can now set format for dates via Yawp.conf.php [yawiki] dateformat, all templates now use this
+
+
++++ 0.12 alpha
+
+2004-07-14
+
+* converted to Yawp::start() hooks instead of "include lib/header.inc.php" calls (be sure to add "start = %DOCUMENT_ROOT%yawiki/lib/start.hook.php" in the [Yawp] group of your config file!)
+* minor schema change (add two columns related to caching) -- see docs/MIGRATE_011_012
+* Removed yawiki.class.php cacheID property
+* implemented automatic cache save/clear of transformed html for pages
+* yawiki::getPage() now returns extra 'html' key with pre-transformed html
+* yawiki::getPage() now does cache saving and cache clearing
+* yawiki::transform() now checks for wikilink rules properly
+* added 'css_th' config key for table header cell CSS class
+* edit.php deletes cached html for old pages referring to new pages
+* index.php no longer transforms on its own, uses the yawiki::getPage() cached html
+* yawiki_store: added 'html' column property, added clearHtml() and clearHtmlBatch() methods\
+* default theme index.tpl.php echoes the page html value instead of body source
+* when editing AreaMap, the rules are reduced to "Wikilink" only
+* diff.tpl.php defaults to 40-char wrap on both diff columns
+* converted header.inc.php to use $GLOBALS so it's a useful Yawp "start" hook file
+* fixed bugs in yawiki_store that would generate PHP warnings when AreaMap empty or indented improperly (might not display right but won't throw warnings)
+* fixed sympathetic bug in yawiki that would generate warnings when AreaMap paths not present
+* minor stylesheet change (links now dotted-border in blue, not gray)
+* in index.tpl.php, disables the "edit" link when another user is already editing the page
+* in comment.inc.php, after posting a comment, redirect via header('Location:') to the same page; this stop the double-posting of comments on refresh or back-button (thanks Noah Botimer)
+
+
++++ 0.11 alpha
+
+2004-06-13
+
+* Removed yawiki $pageTitle property, added getHtmlTitle() method in its place
+* Converted references to $yawiki->pageTitle to $yawiki->getHtmlTitle()
+* When adding an area, title is created based on area name automatically
+* Fixed bug from 0.10 so that area name is displayed even if area has no title
+
+
++++ 0.10 alpha
+
+2004-06-12
+
+* You can help document Yawiki!  http://wiki.ciaweb.net/yawiki/index.php?area=Yawiki_Docs
+* Depends on Yawp 0.12 beta or later, changed method names accordingly
+* Depends on Text_Wiki 0.19 alpha or later, changed method names and config options accordingly
+* In default theme set, converted all & values to &amp; (thanks Hadley Wickham)
+* Added theme_dir in example Yawp conf file (was using the wrong name earlier)
+* Added diff output wrapping support; set diff_wrap in Yawp conf file [yawiki] group to width in characters
+* Added yawiki::getAreaInfo() method
+* If a user does not have access to an area, that are does not show in the list of areas in the default theme
+
+
++++ 0.9 alpha
+
+2004-05-15
+
+* Update to Yawp 0.8 alpha or later and Savant 1.5 stable or later.
+* Major directory structure changes (inc/ removed, tpl/ removed, docs/ added, theme/ added)
+* Yawiki is now themable with Savant 1.5, although it takes thorough familiarity right now (working on making it easier)
+* Changed all template includes of Yawp config items to Savant findTemplate() calls
+* Removed config elements 'header', 'footer', 'stylesheet', and 'auth' from the config file (in the [Yawp] group) -- not needed with themes
+* New [yawiki] config element: theme_dir (the user-defined theme directory)
+* Updated the README file (first update since 0.6, sorry)
+
+
++++ 0.8.5 alpha
+
+2004-05-13
+
+* removed outdated files wiki.php and wiki.tpl.php (vestiges of earlier versions, not needed)
+* updated README to refer to area_list.php, not wiki.php
+* better RSS handling of links where Yawiki is not in the /yawiki/ directory
+
+
++++ 0.8.4 alpha
+
+2004-05-13
+
+* rss.tpl.php now produces properly-formatted XML (thanks again Mike Wallner)
+
+
++++ 0.8.3 alpha
+
+2004-05-12
+
+* index.tpl.php now uses non-breaking spaces around the AreaMap link (thanks Mike Wallner)
+* rss.tpl.php now echoes the RSS XML declaration to get around short tags (thanks Mike Wallner)
+* rss.tpl.php now sends an XML content-type header (thanks Mike Wallner)
+
+
++++ 0.8.2 alpha
+
+2004-05-11
+
+* yawiki_hits now sets default values for referer info (per note from "ant" at unical.it)
+* added RSS link to endbar on public pages
+* added rss_type and rss_amt elements to the [yawiki] group (defaults to 3 days)
+
+
++++ 0.8.1 alpha
+
+2004-05-11
+
+* BAD RELEASE, do not use
+
+
++++ 0.8 alpha
+
+2004-05-10
+
+* SCHEMA UPDATE: users of 0.7 will need to run the SQL commands in the MIGRATE_07_08 file
+* yawiki_hits now tracks IP number, session ID, and referer
+* yawiki_acl::pageView() now checks pageEdit() as well (if you can edit a page, you can view it)
+* Page-specific RSS 2.0 support has been added.  review the rss.php file and the yawiki_store::getChanges() method
+* aAded rudimentary hit-count viewer (hits.php)
+
++++ 0.7.6 alpha
+
+2004-05-05
+
+* Now releases page lock on save
+* Now verifies against Yawp::getUsername() instead of $this->username in yawp.class.php when checking permissions (need to see if user is authenticated or not)
+* Allows you to enter change notes on the edit page
+* Shows change notes on history page
+
+
++++ 0.7.5 alpha
+
+2004-05-05
+
+* Fixed bug where short_tags are on (PHP would choke on the XML declaration in header.tpl.php at line 30)
+* When submitting comments, the comment form is cleared after the comments are posted
+* Updated Yawp.conf.php example file
+
++++ 0.7.4 Alpha
+
+2004-04-25
+
+* Brought in line with Yawp 0.5 and DB_Table 0.18
+
+
++++ 0.7.3 Alpha
+
+2004-04-21
+
+* 0.7.1 and 0.7.2 were interal testing releases only.
+* The yawiki_acl class library would not create its table on first run.  This has been fixed.
+
+
++++ 0.7 Alpha
+
+2004-04-21
+
+* BACKWARDS COMPATIBILITY BREAKS IN THIS RELEASE (sorry, it's alpha software after all)
+* Users of 0.6.2 and prior must update their table structure and data, see MIGRATE, this fixes problems on PostgreSQL
+* Please upgrade to Yawp 0.4 (from wiki.ciaweb.net) and DB_Table 0.17 (from pear.php.net)
+* Text_Diff is now at pear.php.net as well
+* Terminology change: the whole system is now called a 'wiki'
+* Terminology change: each logical namespace is now called an 'area'
+* WikiMap page has been renamed to AreaMap
+* Privilege 'wiki_admin' has been renamed to 'area_admin'
+* Privilege 'sys_admin' has been renamed to 'wiki_admin'
+* The system now gets its list of areas from the 'yawiki_areas' table, not 'yawiki_store'.
+* The new 'yawiki_areas' table stores the title, catchy tag line, turn off/on comments, and set comment-notification email for individual areas
+
+
++++ 0.6.2 Alpha
+
+* You should probably upgrade your version of DB_Table and Text_Wiki (new releases concurrent with Yawiki 0.6.2!)
+* With new version of DB_Table, the extra form parameters in comments.inc.php are not needed (removed them)
+* Remembered to update the VERSION file this time
+* edit.php now uses Yawp::getPost() consistently instead of $_POST
+* auth.tpl.php now uses relative links for acl.php, pages.php, and wiki.php (thanks to Urs Gehrig)
+
+
++++ 0.6.1 Alpha
+
+2004-04-05
+
+* Diffs now convert HTML special characters before display (eliminates XSS vulnerability)
+* Updated README to include note about Text_Diff dependency
+
+
++++ 0.6 Alpha
+
+2004-04-05
+
+* Email notification of comments now includes comment text
+* Added "view source" support
+* Added "diff" support
+
+
++++ 0.5 Alpha
+
+2003-03-27
+
+* Canceling an edit now redirects properly
+* On edit page, current user shows IP number when not signed in
+* Comments get saved on proper page now; had to change "action" in the comment form
+* If only_wiki is set, force the $yawiki->wiki value to that (regardless of GET var for wiki)
+* All link URLs now refer only to the current directory, not "HREF_BASE . '/yawiki/'"
+* Added support for table options (border, spacing, padding) in conf file
+* Added support for turning html on/off in conf file
+* Changed yawiki::_navSetup algorithm, added links for 'map', 'links', and 'history'
+* Added yawiki::getNav() method to access the $nav property
+* yawiki_acl::pageEdit() and pageView() now check to see if user is page admin
+* yacs::getList() now uses quoted filter, not unquoted parameter
+* Page titles now include the wiki name
+* Does not shows the list of wikis when only_wiki is set
+* If WikiAdmin is anonymous and user not signed in, now shows the wiki admin control panel
+
+
++++ 0.4 Alpha 
+
+2003-03-25
+
+* yacs.class.php getList() method used unquoted paramter when getting parent; fixed
+* Yawp.conf-example.php had pmjones@ciaweb.net as comments_notify email; changed to an example address
+* tpl/header.tpl.php had extra <p> and </p> tags around the list of wikis; removed
+
+
++++ 0.3 Alpha
+
+2003-03-24
+
+* Comments now get posted to the right page (changed PHP_SELF to REQUEST_URI in the form)
+* Page-edit check now checks pageAdmin priv
+* Added VERSION file
+* Added CHANGES file
+* Templates now let anonymous sysadmins and wiki admins to see their links
+* In Yawp.conf-example.php, changed HREF_BASE to '/' instead of ''
+* Updated stylesheet config file element to match new HREF_BASE

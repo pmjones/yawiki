@@ -1,0 +1,9 @@
+####### SQL MIGRATION FROM 0.20 to 0.21
+
+##### Make a backup before you try this!  You have been warned!
+
+### yawiki_areas
+
+# add column
+
+ALTER TABLE yawiki_areas ADD COLUMN email_subj VARCHAR(255);

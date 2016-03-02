@@ -1,0 +1,19 @@
+####### SQL MIGRATION FROM 0.7.x to 0.8
+
+##### Make a backup before you try this!  You have been warned!
+
+### yawiki_hits
+
+# add columns
+
+ALTER TABLE yawiki_hits ADD COLUMN ip CHAR(15);
+ALTER TABLE yawiki_hits ADD COLUMN sessid CHAR(32);
+ALTER TABLE yawiki_hits ADD COLUMN referer_host VARCHAR(255);
+ALTER TABLE yawiki_hits ADD COLUMN referer_path VARCHAR(255);
+ALTER TABLE yawiki_hits ADD COLUMN referer_qstr VARCHAR(255);
+
+# add indexes
+
+CREATE INDEX yawiki_hits_ip_index ON yawiki_hits (ip);
+CREATE INDEX yawiki_hits_sessid_index ON yawiki_hits (sessid);
+CREATE INDEX yawiki_hits_referer_host_index ON yawiki_hits (referer_host);
